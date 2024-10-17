@@ -7,37 +7,40 @@ import requests
 import logging
 
 """
-This works.
-Revisit when balls are heavy and cofidence is high.
+Its late, im tired and i dont want to test
+Reminder to self:
+It doesnt work. And its because you dont call scrape() in init anymore.
+You used to, but then your balls got heavier and you changed it.
+Unfortunately you were to lazy to finish it.
 """
 
 
 class BlocketScraper():
     def __init__(self, url):
         self.url = url
+        self.jobs = []  # Ready data
         self.total_cards = 0
         self.cards_scraped = 0
-        self.jobs = self.find_and_append()
+        self.all_cards = self.find_cards()
 
-    def find_and_append(self) -> list[dict[str]]:
+    def find_cards(self) -> list[dict[str]]:
         """
         Finds each job-card from the search page.
         Appends the data and returns the list.
         """
-        jobs_list = []
         soup = self.scrape(url=self.url)
         cards = soup.find_all(
             "div", class_="sc-b071b343-0 eujsyo"
         )
-        self.total_cards = len(cards)
+        self.all_cards = cards
 
-        for card in cards:
+    def scrape_cards(self):
+        for card in self.all_cards:
             self.cards_scraped += 1
             print(f"Scraping page {self.cards_scraped}/{self.total_cards}")
-            sleep(1)
+            sleep(0.5)
             job = self.get_information(card)
-            jobs_list.append(job)
-        return jobs_list
+            self.jobs.append(job)
 
     def scrape(self, url) -> BeautifulSoup:
         """
