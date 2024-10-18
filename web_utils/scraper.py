@@ -31,11 +31,19 @@ Stage 2:
             }, 
             ...
         ]
-    
+
+
+Note to self:
+Instead of having this be funtional programming with extra steps:
+Try to set init variable-values to functions that return.
+Look at UrlConstructor for reference.
+We still want the class to work in two stages.
+But having variable values be return values of methods allows for 
+more explicit type annotation throughout the class.
 """
 
 
-class BlocketScraper():
+class BlocketScraper:
     def __init__(self, url):
         self.url = url
         self.jobs = []  # Ready data
@@ -49,9 +57,7 @@ class BlocketScraper():
         Appends the tags and returns the list.
         """
         soup = self.scrape(url=self.url)
-        cards = soup.find_all(
-            "div", class_="sc-b071b343-0 eujsyo"
-        )
+        cards = soup.find_all("div", class_="sc-b071b343-0 eujsyo")
         return cards
 
     def scrape_cards(self, amount_cards):
@@ -60,7 +66,7 @@ class BlocketScraper():
 
         else:
             self.all_cards = self.all_cards[:amount_cards]
-            
+
         for card in self.all_cards:
             self.cards_scraped += 1
             print(f"Scraping page {self.cards_scraped}/{self.total_cards}")
@@ -83,16 +89,20 @@ class BlocketScraper():
                 return BeautifulSoup(r.content, "html.parser")
 
             except RequestException as e:
-                logging.error(f"Request failed (attempt {attempt + 1}"
-                              f"/{retry_amount}): {e}")
+                logging.error(
+                    f"Request failed (attempt {attempt + 1}"
+                    f"/{retry_amount}): {e}"
+                )
 
                 if attempt < retry_amount:
                     logging.info(f"Retrying in {retry_delay} seconds...")
                     sleep(retry_delay)
 
                 else:
-                    logging.error(f"Could not fetch data in {retry_amount} "
-                                  "retries. Exiting program...")
+                    logging.error(
+                        f"Could not fetch data in {retry_amount} "
+                        "retries. Exiting program..."
+                    )
                     sys.exit(1)
 
     def get_information(self, card) -> dict[str:str]:
@@ -100,9 +110,7 @@ class BlocketScraper():
             "h2", class_="sc-f74edbc7-0 sc-6694485c-3 bZDiVh eUtWPK"
         ).string
 
-        company = card.find(
-            "span", class_="sc-6694485c-5 hCmCSo"
-        ).string
+        company = card.find("span", class_="sc-6694485c-5 hCmCSo").string
 
         prefix = "https://jobb.blocket.se"
         specific = card.find(
@@ -121,7 +129,7 @@ class BlocketScraper():
             "title": title,
             "company": company,
             "link": application_link,
-            "description": description
+            "description": description,
         }
         return job
 
@@ -136,9 +144,7 @@ class BlocketScraper():
         These tags are defined within 'ignore_classes'.
         """
         # This was the closest uniform class name I could find.
-        parent = job_page.find(
-            "div", class_="sc-5fe98a8b-12 fyLthZ"
-        )
+        parent = job_page.find("div", class_="sc-5fe98a8b-12 fyLthZ")
 
         if not parent:
             print(
@@ -153,7 +159,7 @@ class BlocketScraper():
         ignore_classes = [
             "sc-b08acc7e-1 eROHBI",  # "Anmäl annons"
             "sc-d7bf9244-0 bGhufW",  # "Denna annons kommer från..."
-            "sc-dbdab9bd-0 betiZj"  # "Länk till ansökning"
+            "sc-dbdab9bd-0 betiZj",  # "Länk till ansökning"
         ]
 
         def extract_text(element):
@@ -183,7 +189,7 @@ class BlocketScraper():
         return full_text
 
     def get_application_link(self, job_page) -> str:
-        application_link = job_page.find(
-            "a", class_="sc-dbdab9bd-0 betiZj"
-        )["href"]
+        application_link = job_page.find("a", class_="sc-dbdab9bd-0 betiZj")[
+            "href"
+        ]
         return application_link
