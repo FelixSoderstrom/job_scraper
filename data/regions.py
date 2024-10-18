@@ -1,3 +1,23 @@
+"""
+Unfortunately there are too many inconsistencies in how regions are shown
+within the URL on blocket.
+Therefore the only option I could think of was key value pairs and write
+them all out separately.
+At least this makes for easy access and little thinking. Silver lining!
+
+As for the cities,
+we can always use set(cities) to allow for faster iteration.
+Unfortunately difflib did not support this. Bummer.
+Hopefully the user that fucks with us intentionally wont get mad
+because of this slight inconvenience!
+What am I talking about? I don't get paid for this. I don't care about the user!
+
+That was mean..
+I'm sorry user..
+Thanks for being here.
+You know I love you! <3
+"""
+
 län = {
     "blekinge": "blekinge-laen",
     "dalarna": "dalarnas-laen",
@@ -19,18 +39,15 @@ län = {
     "västmanland": "vaestmanlands-laen",
     "västra götaland": "vaestra-goetalands-laen",
     "örebro": "oerebro-laen",
-    "östergötland": "oestergoetlands-laen"
+    "östergötland": "oestergoetlands-laen",
 }
 
-blekinge = [
+cities = [
     "karlshamn",
     "kaslskrona",
     "olofström",
     "ronneby",
-    "sölvesborg"
-]
-
-dalarna = [
+    "sölvesborg",
     "avesta",
     "boslänge",
     "falun",
@@ -45,12 +62,8 @@ dalarna = [
     "smedjebacken",
     "säter",
     "vansbro",
-    "älvedalen"
-]
-
-gotland = ["gotland"]
-
-gävleborg = [
+    "älvedalen",
+    "gotland",
     "bollnäs",
     "gävle",
     "hofors",
@@ -60,19 +73,13 @@ gävleborg = [
     "ockelbo",
     "ovanåker",
     "sandviken",
-    "söderhamn"
-]
-
-halland = [
+    "söderhamn",
     "falkenberg",
     "halmstad",
     "hylte",
     "kungsbacka",
     "laholm",
-    "varberg"
-]
-
-jämtland = [
+    "varberg",
     "berg",
     "bräcke",
     "härjedalen",
@@ -80,10 +87,7 @@ jämtland = [
     "ragunda",
     "strömsund",
     "åre",
-    "östersund"
-]
-
-jönköping = [
+    "östersund",
     "aneby",
     "eksjö",
     "gislaved",
@@ -96,10 +100,7 @@ jönköping = [
     "tranås",
     "vaggeryd",
     "vetlanda",
-    "värnamo"
-]
-
-kalmar = [
+    "värnamo",
     "borgholm",
     "emmaboda",
     "hultsfred",
@@ -111,10 +112,7 @@ kalmar = [
     "oskarshamn",
     "torsås",
     "vimmerby",
-    "västervik"
-]
-
-kronoberg = [
+    "västervik",
     "alvesta",
     "lessebo",
     "ljungby",
@@ -122,10 +120,7 @@ kronoberg = [
     "tingsryd",
     "uppvidinge",
     "växjö",
-    "älmhult"
-]
-
-norrbotten = [
+    "älmhult",
     "arjeplog",
     "arvidsjaur",
     "boden",
@@ -139,10 +134,7 @@ norrbotten = [
     "piteå",
     "älvsbyn",
     "överkalix",
-    "övertorneå"
-]
-
-skåne = [
+    "övertorneå",
     "bjuv",
     "bromölla",
     "burlöv",
@@ -175,10 +167,7 @@ skåne = [
     "ängelholm",
     "åstorp",
     "örkeljunga",
-    "östra göinge"
-]
-
-stockholm = [
+    "östra göinge",
     "botkyrka",
     "danderyd",
     "ekerö",
@@ -204,10 +193,7 @@ stockholm = [
     "vallentuna",
     "vaxholm",
     "värmdö",
-    "österåker"
-]
-
-sodermanland = [
+    "österåker",
     "eskilstuna",
     "flen",
     "gnesta",
@@ -216,10 +202,7 @@ sodermanland = [
     "oxelösund",
     "strängnäs",
     "trosa",
-    "vingåker"
-]
-
-uppsala = [
+    "vingåker",
     "enköping",
     "heby",
     "håbo",
@@ -227,10 +210,7 @@ uppsala = [
     "tierp",
     "uppsala",
     "älvkarleby",
-    "östhammar"
-]
-
-varmland = [
+    "östhammar",
     "arvika",
     "eda",
     "filipstad",
@@ -246,10 +226,7 @@ varmland = [
     "sunne",
     "säffle",
     "torsby",
-    "årjäng"
-]
-
-vasterbotten = [
+    "årjäng",
     "bjurholm",
     "dorotea",
     "lycksele",
@@ -264,20 +241,14 @@ vasterbotten = [
     "vilhelmina",
     "vindeln",
     "vännäs",
-    "åsele"
-]
-
-vasternorrlands = [
+    "åsele",
     "härnösand",
     "kramfors",
     "sollefteå",
     "sundsvall",
     "timrå",
     "ånge",
-    "örnsköldsvik"
-]
-
-vastmanland = [
+    "örnsköldsvik",
     "arboga",
     "fagersta",
     "hallstahammar",
@@ -287,10 +258,7 @@ vastmanland = [
     "sala",
     "skinnskatteberg",
     "surahammar",
-    "västerås"
-]
-
-västra_götaland = [
+    "västerås",
     "ale",
     "alingsås",
     "bengtsfors",
@@ -339,10 +307,7 @@ västra_götaland = [
     "vänersborg",
     "vårgårda",
     "åmål",
-    "öckerö"
-]
-
-örebro = [
+    "öckerö",
     "askersund",
     "degerfors",
     "hallsberg",
@@ -354,10 +319,7 @@ västra_götaland = [
     "lindesberg",
     "ljusnarsberg",
     "nora",
-    "örebro"
-]
-
-östergötland = [
+    "örebro",
     "boxholm",
     "finspång",
     "kinda",
@@ -370,5 +332,5 @@ västra_götaland = [
     "valdemarsvik",
     "ydre",
     "åtvidaberg",
-    "ödeshög"
+    "ödeshög",
 ]

@@ -57,8 +57,10 @@ class BlocketScraper():
     def scrape_cards(self, amount_cards):
         if amount_cards == self.toal_cards:
             pass
+
         else:
-            pass#CONTINUE HERE
+            self.all_cards = self.all_cards[:amount_cards]
+            
         for card in self.all_cards:
             self.cards_scraped += 1
             print(f"Scraping page {self.cards_scraped}/{self.total_cards}")
