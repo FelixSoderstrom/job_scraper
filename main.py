@@ -1,24 +1,22 @@
 from scraper import BlocketScraper
 from data import regions
-from custom_exceptions import InputError, ApiError
+from data import InputError, ApiError
 import os
 import re
 
 """
 Continue from here.
-Start dabbling with the open ai API
-send it the description and come up with a good setting
-implement the logic for api keys and selections
+I will probbably use OpenAI's Swarm for this project.
+For everyy job I can instantiate a class that creates agents.
+Agent1 takes descr-text and summarized into 2-3 sentences.
+We relay this summary to the user, they decide if the job is relevant or not.
+We ask the user for their skillset (no need for agent call here).
+We relay the full job desc-text alongsite user skillset to agent2.
+Agent2 writes a cover letter for user.
+Cover letter is previewed.
+User is prompted to save letter to a file.
 
-api enables = false should skip the process entirely and 
-review the dict to the user. user will then be prompted to save to file.
 
-with apienabled=True
-calls the api with description
-presents the new data to the user. user will then be prompted to save file.
-
-Warn the user when scraper finds more than 10 or so jobs.
-I probbably need to remake the blocketscraper class for this to work 
 """
 
 
@@ -34,20 +32,55 @@ def run(url):
     url = define_search_term()
 
     scraper = BlocketScraper(url)  # This only finds the cards(jobs).
-    if user_wants_to_scrape(scraper) is True:
-        scraper.scrape_cards()  # This scrapes every card.
+    amount_cards = user_choose_amount_of_cards()
+    scraper.scrape_cards(amount_cards)  # This scrapes every card.
     jobs = scraper.jobs  # list[dict[str:str]]
 
     # chat gippity stuff here
     # print_scraped_jobs_debugger(jobs)
 
 
-def user_wants_to_scrape(scraper):
-    print(
-        f"Scraper found {scraper.total_cards} jobs.\n"
-        "Would you like to scrape all of them?\n"
-        f"This will take approximately {scraper.total_cards * 2 + 2} seconds"
-    )
+def user_choose_amount_of_cards(scraper) -> int: #change this name
+    #CONTINUE HERE
+    # The correct logic/syntax is in test.py
+    """
+    RAISES InputError.
+    Presents the amount of cards found to user.
+    User picks how many jobs to scrape.
+    Integer is returned.
+    """
+    while True:
+        print(
+            f"Scraper found {scraper.total_cards} jobs to fit your search.\n"
+            "This will take approximately "
+            f"{round(scraper.total_cards / 5) + 1} seconds to scrape."
+        )
+        choice = input(
+            "Would you like to scrape them all? [yes/no] "
+        ).lower().strip()
+
+        if choice == "yes":
+            return scraper.total_cards
+        elif choice =="no":
+            break
+
+    while True:
+        try:
+            amount_cards = int(
+                input("How many jobs would you like to scrape? ").strip()
+            )
+            
+        except ValueError:
+            raise InputError(
+                "You did not enter a number."
+            )
+        
+        if 0 < amount_cards < scraper.total_cards:
+            return amount_cards
+        else:
+            raise InputError(
+                "You did not enter a valid number."
+            )
 
 
 def print_scraped_jobs_debugger(jobs):

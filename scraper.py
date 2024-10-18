@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 from requests.exceptions import RequestException
 from time import sleep
 import re
@@ -7,11 +7,31 @@ import requests
 import logging
 
 """
-Its late, im tired and i dont want to test
-Reminder to self:
-It doesnt work. And its because you dont call scrape() in init anymore.
-You used to, but then your balls got heavier and you changed it.
-Unfortunately you were to lazy to finish it.
+This class scrapes in two stages.
+
+Stage 1:
+    Scrapes all job-cards from the search page.
+    Returns a list of BeautifulSoup Tags (cards).
+    Here, we can access title, company and the link to the full description.
+    Note: Link mentioned above is NOT the same link that is being retuend below.
+
+Stage 2:
+    Upon user confirmation, scrapes a specified amount of cards.
+    Here we can access 
+    application link (the one we return in the deictionary below)
+    and description text.
+
+    Return example:
+        jobs = [
+            {
+                "title": "Look here, come work for us!",
+                "company": "Uncle Bobs Indentation Error Inc.",
+                "link": "https://www.example.com",
+                "description": "Lorem ipsum"
+            }, 
+            ...
+        ]
+    
 """
 
 
@@ -23,22 +43,26 @@ class BlocketScraper():
         self.cards_scraped = 0
         self.all_cards = self.find_cards()
 
-    def find_cards(self) -> list[dict[str]]:
+    def find_cards(self) -> list[Tag]:
         """
         Finds each job-card from the search page.
-        Appends the data and returns the list.
+        Appends the tags and returns the list.
         """
         soup = self.scrape(url=self.url)
         cards = soup.find_all(
             "div", class_="sc-b071b343-0 eujsyo"
         )
-        self.all_cards = cards
+        return cards
 
-    def scrape_cards(self):
+    def scrape_cards(self, amount_cards):
+        if amount_cards == self.toal_cards:
+            pass
+        else:
+            pass#CONTINUE HERE
         for card in self.all_cards:
             self.cards_scraped += 1
             print(f"Scraping page {self.cards_scraped}/{self.total_cards}")
-            sleep(0.5)
+            sleep(0.2)
             job = self.get_information(card)
             self.jobs.append(job)
 
