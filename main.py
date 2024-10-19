@@ -1,10 +1,7 @@
 from web_utils.scraper import BlocketScraper
 from web_utils.get_url import UrlConstructor
-from data_structures.regions import län, cities  # remove after migration
 from data_structures.custom_exceptions import InputError, ApiError
-from difflib import get_close_matches  # remove after migration
-import os  # remove after migration
-import re  # remove after migration
+import os
 
 """
 I will probbably use OpenAI's Swarm for this project.
@@ -19,19 +16,26 @@ User is prompted to save letter to a file.
 We go through this process for every job scraped.
 
 
-Functionality is tested 90%. Solid isch
-Url construction is being migrated to get_url.py.
+Url construction has been migrated to get_url.py
+
 
 Note to self:
-Tidy up in here.
-Dont remove url construction-comments until class is confirmed working.
-The goal of this file should be to keep it minimal and
-have very little functionality.
+
 """
+
+# Assuming this is set to None if it doesn't exist in the users OS.
+API_KEY = os.environ.get("OPENAI_API")
 
 
 def run():
-    # API_KEY = os.environ.get("OPENAI_API")
+    # handling swarm agents.
+    # Syntac should be more along the lines of:
+    # if API_enabled():
+    #     agent = JobCoach()
+    # Instantiating this class should send out a
+    # disclaimer regarding api calls and costs
+
+    # This entire logic should be moved into a separate class
     # api_enabled = disclaimer()
     # if api_enabled:
     #     if API_KEY is None:
@@ -41,15 +45,16 @@ def run():
 
     constructor = UrlConstructor()
 
-    print(constructor.url)
+    url = constructor.url
+    search_terms = constructor.search_term_strings
+    job_finder = BlocketScraper(
+        url, search_terms
+    )  # This only finds the cards(jobs).
+    jobs = job_finder.jobs
 
-    # scraper = BlocketScraper(url)  # This only finds the cards(jobs).
-    # amount_cards = prompt_user_amount_cards()
-    # scraper.scrape_cards(amount_cards)  # This scrapes every card.
-    # jobs = scraper.jobs  # list[dict[str:str]]
-
+    #
     # chat gippity stuff here
-    # print_scraped_jobs_debugger(jobs)
+    print_scraped_jobs_debugger(jobs)
 
 
 def disclaimer() -> bool:
@@ -83,163 +88,37 @@ def disclaimer() -> bool:
             return False
 
 
-# def define_search_term() -> str:
-#     base = "jobb.blocket.se/lediga-jobb?q="
-#     job = get_job_title()
-#     location = get_location()
-
-#     url = base + job + location
-#     return url
-
-
-# def get_job_title() -> str:
+# def prompt_user_amount_cards(scraper) -> int:
 #     """
-#     Takes input and modifies the job search-term to fit in url.
+#     Raises InputError.
+#     Presents the amount of cards found to user.
+#     User picks how many jobs to scrape.
+#     Integer is returned.
 #     """
 #     while True:
-#         user_input = input("Enter a job search-term: ").lower()
-#         search_term = user_input.replace(" ", "+")
-#         if search_term:
-#             return search_term
-#         else:
-#             raise InputError(
-#                 "After processing your input, "
-#                 "the search term was left empty."
-#             )
-
-
-# def get_location() -> str:
-#     """
-#     Takes input and matches against available regions.
-#     Translates input to fit in the url.
-#     """
-#     prefix = "&filters="
-#     filters = []
-
-#     while True:
-#         valid_location_types = ["region", "city"]
-#         location_type = (
-#             input("Would you like to search within a city or region/län? ")
-#             .lower()
-#             .strip()
-#         )
-#         if location_type in valid_location_types:
-#             break
-#         else:
-#             raise InputError(
-#                 "Input did not match any of the "
-#                 f"following: {", ".join(valid_location_types)}"
-#             )
-
-#     while True:
-#         user_input = input(f"Enter a {location_type}: ").lower().strip()
-#         location_string = confirm_region_city_exists(
-#             user_input, location_type
-#         )
-#         filter = prefix + location_string
-#         filters.append(filter)
-#         more_filters = input(
-#             f"Would you like to add another {location_type}? [yes/no] "
-#         )
-#         if more_filters == "no":
-#             break
-
-#     return filters
-
-
-# def confirm_region_city_exists(user_input, location_type) -> str:
-#     """
-#     Takes the city or region choice as location_type.
-#     Changes and returns the string depending on location type.
-#     Calls find_suggestions and loops with
-#     """
-#     while True:
-#         if location_type == "city":
-#             cities_set = set(cities)
-
-#             if user_input in cities_set:
-#                 search_term = (
-#                     user_input.replace("å", "aa")
-#                     .replace("ä", "ae")
-#                     .replace("ö", "oe")
-#                     .replace(" ", "-")
-#                 )
-#                 break
-#             else:
-#                 user_input = find_suggestions(
-#                     user_input, location_type, available_searches=cities
-#                 )
-#         else:
-#             if user_input in län.keys():
-#                 search_term = län[user_input]
-#                 break
-#             else:
-#                 user_input = find_suggestions(
-#                     user_input, location_type, available_searches=län
-#                 )
-
-#     return search_term
-
-
-# def find_suggestions(user_input, location_type, available_searches):
-#     """
-#     Uses difflib to find close matches to users input.
-#     Presents suggestions and prompts user to enter location again.
-#     This is a part of the loop found in 'confirm_region_city_exists'
-#     and can be called recursively.
-#     """
-#     suggestions = get_close_matches(
-#         user_input, available_searches, n=len(available_searches), cutoff=0.65
-#     )
-
-#     if suggestions:
 #         print(
-#             f"The {location_type}: '{user_input}' could not be found.\n"
-#             "Did you mean any of these?"
+#             f"Scraper found {scraper.total_cards} relevant jobs.\n"
+#             "This will take approximately "
+#             f"{round(scraper.total_cards / 5) + 1} seconds to scrape."
 #         )
-#         for suggestion in suggestions:
-#             print(suggestion.capitalize())
 
-#         return input("Please re-enter your choice here: ").lower().strip()
-#     else:
-#         print(
-#             "Your input didn't match any available options.\n"
-#             "Please try again."
-#         )
-#         return
+#         try:
+#             amount_cards = int(
+#                 input("How many jobs would you like to scrape? ").strip()
+#             )
+#         except ValueError:
+#             print(InputError("You did not enter a number."))
+#             continue
 
+#         try:
+#             if 0 < amount_cards < scraper.total_cards:
+#                 return amount_cards
+#             else:
+#                 print(InputError("You did not enter a valid number."))
+#                 continue
 
-def prompt_user_amount_cards(scraper) -> int:
-    """
-    Raises InputError.
-    Presents the amount of cards found to user.
-    User picks how many jobs to scrape.
-    Integer is returned.
-    """
-    while True:
-        print(
-            f"Scraper found {scraper.total_cards} relevant jobs.\n"
-            "This will take approximately "
-            f"{round(scraper.total_cards / 5) + 1} seconds to scrape."
-        )
-
-        try:
-            amount_cards = int(
-                input("How many jobs would you like to scrape? ").strip()
-            )
-        except ValueError:
-            print(InputError("You did not enter a number."))
-            continue
-
-        try:
-            if 0 < amount_cards < scraper.total_cards:
-                return amount_cards
-            else:
-                print(InputError("You did not enter a valid number."))
-                continue
-
-        except InputError as e:
-            print(e)
+#         except InputError as e:
+#             print(e)
 
 
 def print_scraped_jobs_debugger(jobs):
