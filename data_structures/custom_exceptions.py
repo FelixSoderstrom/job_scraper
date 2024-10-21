@@ -16,7 +16,5 @@ class ApiError(Exception):
 
 class InputError(Exception):
     def __init__(self, message):
-        self.message = (
-            f"\n{YEL}InputError:{RES} {message}\nPlease try again.\n"
-        )
+        self.message = f"\n{YEL}InputError:{RES} {message}\nPlease try again.\n"
         super().__init__(self.message)

@@ -4,27 +4,14 @@ from data_structures.custom_exceptions import InputError, ApiError
 import os
 
 """
-I will probbably use OpenAI's Swarm for this project.
-For every job found, I can instantiate a class that creates agents.
-Agent1 takes descr-text and summarizes into 2-3 sentences.
-We relay this summary to the user, they decide if the job is relevant or not.
-We ask the user for their skillset (no agent).
-We relay the original desc-text and user skillset to agent2.
-Agent2 writes a cover letter for user.
-Cover letter is previewed.
-User is prompted to save letter to a file.
-We go through this process for every job scraped.
-
-
-Url construction has been migrated to get_url.py
-
-
 Note to self:
+
 
 """
 
 # Assuming this is set to None if it doesn't exist in the users OS.
-API_KEY = os.environ.get("OPENAI_API")
+API_KEY = os.environ.get("OPENAI_API_KEY")
+PEOJECT_ID = os.environ.get("OPENAI_PROJECT_ID_JOB_SCRAPER")
 
 
 def run():
@@ -123,12 +110,15 @@ def disclaimer() -> bool:
 
 def print_scraped_jobs_debugger(jobs):
     # Remove this function
-    for job in jobs:
-        print(f"Title: {job["title"]}")
-        print(f"Company: {job["company"]}")
-        print(f"Description: {job["description"]}")
-        print(f"Link: {job["link"]}")
-        print("-" * 50)
+    try:
+        for job in jobs:
+            print(f"Title: {job["title"]}")
+            print(f"Company: {job["company"]}")
+            print(f"Description: {job["description"]}")
+            print(f"Link: {job["link"]}")
+            print("-" * 50)
+    except TypeError as e:
+        print(f"One or more jobs were missing: {e}")
 
 
 if __name__ == "__main__":

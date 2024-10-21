@@ -34,16 +34,6 @@ Stage 2:
             ...
         ]
 
-
-Note to self:
-Might be done, might not be.
-Ask me again when I'm not on a bus with 0.25kbs wifi.
-Will test this sometime soon.
-
-I need: look up if it's okay to return something in __init__.
-I should: add more error handling.
-I want: be stationary and not have motion sickness.
-
 """
 
 
@@ -54,8 +44,8 @@ def clear():
 class BlocketScraper:
     def __init__(self, url, search_terms):
         self.url = url
+        self.jobs: list[str] = []  # Ready data
         self.search_terms: dict[list] = search_terms
-        self.jobs: list[str] = None  # Ready data
         self.all_cards: list[Tag] = self.find_cards()
         self.total_cards: int = len(self.all_cards)
         self.permitted_amount: int = self.prompt_user_amount_cards()
@@ -81,10 +71,14 @@ class BlocketScraper:
 
         for card in self.all_cards:
             cards_scraped += 1
-            print(f"Scraping page {cards_scraped}/{self.total_cards}")
+            logging.info(f"Scraping page {cards_scraped}/{self.total_cards}")
             sleep(0.2)
             job = self.get_information(card)
-            self.jobs.append(job)
+            try:
+                self.jobs.append(job)
+            except AttributeError as e:
+                logging.error(f"Could not append job-card: {e}")
+                continue
 
     def scrape(self, url) -> BeautifulSoup:
         """
@@ -111,23 +105,28 @@ class BlocketScraper:
                     sleep(retry_delay)
 
                 else:
-                    logging.error(
+                    raise RequestException(
                         f"Could not fetch data in {retry_amount} "
                         "retries. Exiting program..."
                     )
-                    sys.exit(1)
 
     def get_information(self, card) -> dict[str:str]:
-        title = card.find(
-            "h2", class_="sc-f74edbc7-0 sc-6694485c-3 bZDiVh eUtWPK"
-        ).string
-
-        company = card.find("span", class_="sc-6694485c-5 hCmCSo").string
-
         prefix = "https://jobb.blocket.se"
-        specific = card.find(
-            "a", class_="sc-bc48e3a4-0 hwRjcc sc-b071b343-1 fpcmct"
-        )["href"]
+
+        try:
+            title = card.find(
+                "h2", class_="sc-f74edbc7-0 sc-6694485c-3 bZDiVh eUtWPK"
+            ).string
+
+            company = card.find("span", class_="sc-6694485c-5 hCmCSo").string
+
+            specific = card.find(
+                "a", class_="sc-bc48e3a4-0 hwRjcc sc-b071b343-1 fpcmct"
+            )["href"]
+
+        except AttributeError as e:
+            logging.error(f"Error extracting elements from card: {e}")
+
         card_link = prefix + specific
 
         job_page = self.scrape(url=card_link)
@@ -156,14 +155,13 @@ class BlocketScraper:
         These tags are defined within 'ignore_classes'.
         """
         # This was the closest uniform class name I could find.
-        parent = job_page.find("div", class_="sc-5fe98a8b-12 fyLthZ")
-
-        if not parent:
-            print(
-                "Something went wrong when looking for job description: "
-                "Parent div not found"
+        try:
+            parent = job_page.find("div", class_="sc-5fe98a8b-12 fyLthZ")
+        except AttributeError as e:
+            logging.error(
+                f"Could not find the parent div of description text: {e}"
             )
-            sys.exit(1)
+            return
 
         text_content = []
 
@@ -214,14 +212,14 @@ class BlocketScraper:
         Integer is returned.
         """
         while True:
-            print(
-                f"Scraper found {self.total_cards} jobs matching search terms: \n"
-                f"'{self.search_terms["job"]}' in "
-                f"{", ".join(
+            logging.info(
+                f"We found {self.total_cards} jobs matching "
+                f"search terms: \n'{self.search_terms["job"]}' in :"
+                f"'{", ".join(
                     self.search_terms["locations"]
-                    )}.\n"
+                    )}'.\n"
                 "Scraping all of them will take approximately "
-                f"{round(self.total_cards / 5) + 1} seconds to scrape."
+                f"{round(self.total_cards / 5) + 1} seconds."
             )
 
             try:
@@ -230,14 +228,16 @@ class BlocketScraper:
                 )
                 clear()
             except ValueError:
-                print(InputError("You did not enter a number."))
+                logging.info(InputError("You did not enter a number."))
                 continue
 
             try:
                 if 0 < chosen_amount <= self.total_cards:
                     return chosen_amount
                 else:
-                    print(InputError("You did not enter a valid number."))
+                    logging.info(
+                        InputError("You did not enter a valid number.")
+                    )
                     continue
 
             except InputError as e:
